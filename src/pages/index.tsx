@@ -11,7 +11,7 @@ interface Cell {
 const Home = () => {
   const boardRow = 10;
   const boardCol = 10;
-  const bom = 2;
+  const bom = 20;
   const [restBom, setRestBom] = useState<number>(bom);
   const [board, setBoard] = useState<Cell[][]>([]);
   const [first, setFirst] = useState<boolean>(true);
@@ -25,12 +25,6 @@ const Home = () => {
     [1, -1],
     [0, -1],
     [-1, -1],
-    [-1, 0],
-  ];
-  const ewns = [
-    [0, 1],
-    [0, -1],
-    [1, 0],
     [-1, 0],
   ];
 
@@ -105,6 +99,7 @@ const Home = () => {
     }
 
     const turnOver = (tx: number, ty: number, arr: Cell[][]) => {
+      if (arr[ty][tx].neighbors !== 0) return;
       for (const d of directions) {
         if (arr[ty + d[0]] !== undefined) {
           if (arr[ty + d[0]][tx + d[1]] !== undefined) {
@@ -116,11 +111,12 @@ const Home = () => {
               arr[ty + d[0]][tx + d[1]].revealed = true;
               turnOver(tx + d[1], ty + d[0], arr);
             } else if (arr[ty + d[0]][tx + d[1]].neighbors !== 0) {
-              for (const e of ewns) {
+              for (const e of directions) {
                 if (arr[ty + e[0]] !== undefined) {
                   if (
                     arr[ty + e[0]][tx + e[1]] !== undefined &&
-                    arr[ty + e[0]][tx + e[1]].neighbors !== 0
+                    arr[ty + e[0]][tx + e[1]].neighbors !== 0 &&
+                    !arr[ty + e[0]][tx + e[1]].mine
                   ) {
                     arr[ty + e[0]][tx + e[1]].revealed = true;
                   }
