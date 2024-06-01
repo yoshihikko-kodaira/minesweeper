@@ -124,10 +124,11 @@
 }
 
 .display {
-  width: 50px;
+  width: 4;
+  height: 30px;
   padding: 5px;
   font-family: 'Digital-7', sans-serif;
-  font-size: 24px;
+  font-size: 16px;
   color: red;
   text-align: center;
   background-color: #000;

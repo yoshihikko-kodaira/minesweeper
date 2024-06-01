@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styles from './index.module.css';
 
 interface Cell {
@@ -9,10 +9,11 @@ interface Cell {
 }
 
 const Home = () => {
-  const boardRow = 10;
-  const boardCol = 10;
-  const bom = 20;
-  const [restBom, setRestBom] = useState<number>(bom);
+  const [level, setLevel] = useState<'soft' | 'standerd' | 'hard' | 'costom'>('soft');
+  const [boardRow, setBoardRow] = useState<number>(9);
+  const [boardCol, setBoardCol] = useState<number>(9);
+  const [bom, setBom] = useState<number>(10);
+  const [restBom, setRestBom] = useState<number>(10);
   const [board, setBoard] = useState<Cell[][]>([]);
   const [first, setFirst] = useState<boolean>(true);
   const [lose, setLose] = useState<number>(12);
@@ -28,11 +29,31 @@ const Home = () => {
     [-1, 0],
   ];
 
-  const genBoard = (board_Row: number, board_Col: number) => {
+  const levelSet = useCallback((lev: 'soft' | 'standerd' | 'hard' | 'costom') => {
+    if (lev === 'soft') {
+      setBoardRow(9);
+      setBoardCol(9);
+      setBom(10);
+    } else if (lev === 'standerd') {
+      setBoardRow(16);
+      setBoardCol(16);
+      setBom(40);
+    } else if (lev === 'hard') {
+      setBoardRow(16);
+      setBoardCol(30);
+      setBom(10);
+    } else if (lev === 'costom') {
+      setBoardRow(9);
+      setBoardCol(9);
+      setBom(10);
+    }
+  }, []);
+
+  const genBoard = useCallback(() => {
     const newArr: Cell[][] = [];
-    for (let i = 0; i < board_Row; i++) {
+    for (let i = 0; i < boardRow; i++) {
       const arr: Cell[] = [];
-      for (let j = 0; j < board_Col; j++) {
+      for (let j = 0; j < boardCol; j++) {
         arr.push({
           mine: false,
           neighbors: 0,
@@ -42,15 +63,24 @@ const Home = () => {
       }
       newArr.push(arr);
     }
-
     return newArr;
-  };
+  }, [boardRow, boardCol]);
 
   useEffect(() => {
-    setBoard(genBoard(boardRow, boardCol));
-  }, []);
+    levelSet(level);
+  }, [level, levelSet]);
+
+  useEffect(() => {
+    setBoard(genBoard());
+    setRestBom(bom);
+    setFirst(true);
+    setLose(12);
+  }, [boardRow, boardCol, genBoard, bom]);
 
   const handleTurnOver = (x: number, y: number) => {
+    if (lose === 14) {
+      return;
+    }
     if (board[y][x].flagged) {
       return;
     }
@@ -140,14 +170,17 @@ const Home = () => {
       }
     }
 
-    if (num === boardCol * boardRow - bom) {
+    if (num === boardRow * boardCol - bom) {
       setLose(13);
       return;
     }
   };
 
   const handleRightClick = (event: React.MouseEvent, x: number, y: number) => {
-    event.preventDefault(); // デフォルトのコンテキストメニューを無効化
+    if (lose === 14) {
+      return;
+    }
+    event.preventDefault();
     const newarr = [...board];
     newarr[y][x].flagged = !newarr[y][x].flagged;
     if (newarr[y][x].flagged) {
@@ -159,14 +192,49 @@ const Home = () => {
   };
 
   const handleReset = () => {
-    setBoard(genBoard(boardRow, boardCol));
+    setBoard(genBoard());
     setRestBom(bom);
     setFirst(true);
     setLose(12);
   };
 
+  const handleLevel = (e: 'soft' | 'standerd' | 'hard' | 'costom') => {
+    setLevel(e);
+  };
+
   return (
     <div className={styles.container}>
+      <div>
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <div
+            onClick={() => handleLevel('soft')}
+            style={{ fontWeight: level === 'soft' ? 'bold' : 'normal', cursor: 'pointer' }}
+          >
+            初級
+          </div>
+          <div
+            onClick={() => handleLevel('standerd')}
+            style={{ fontWeight: level === 'standerd' ? 'bold' : 'normal', cursor: 'pointer' }}
+          >
+            中級
+          </div>
+          <div
+            onClick={() => handleLevel('hard')}
+            style={{ fontWeight: level === 'hard' ? 'bold' : 'normal', cursor: 'pointer' }}
+          >
+            上級
+          </div>
+          <div
+            onClick={() => handleLevel('costom')}
+            style={{
+              fontWeight: level === 'costom' ? 'bold' : 'normal',
+              cursor: 'pointer',
+            }}
+          >
+            カスタム
+          </div>
+        </div>
+      </div>
       <div className={styles.gamecontainer}>
         <div className={styles.topbar}>
           <div className={styles.display}>{restBom}</div>
