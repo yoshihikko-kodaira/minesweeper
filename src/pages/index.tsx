@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './index.module.css';
 
 interface Cell {
@@ -17,6 +17,8 @@ const Home = () => {
   const [board, setBoard] = useState<Cell[][]>([]);
   const [first, setFirst] = useState<boolean>(true);
   const [lose, setLose] = useState<number>(12);
+  const [time, setTime] = useState<number>(0);
+  const timerRef = useRef<number | undefined>(undefined);
 
   const directions = [
     [-1, 1],
@@ -76,8 +78,21 @@ const Home = () => {
     setFirst(true);
     setLose(12);
   }, [boardRow, boardCol, genBoard, bom]);
+  useEffect(() => {
+    if (!first) {
+      timerRef.current = setInterval(() => {
+        setTime((prevTime) => prevTime + 1);
+      }, 1000) as unknown as number;
+    } else {
+      clearInterval(timerRef.current);
+      timerRef.current = undefined;
+    }
+  }, [first]);
 
   const handleTurnOver = (x: number, y: number) => {
+    if (lose === 13) {
+      return;
+    }
     if (lose === 14) {
       return;
     }
@@ -93,6 +108,8 @@ const Home = () => {
         }
       }
       setLose(14);
+      clearInterval(timerRef.current);
+      timerRef.current = undefined;
       return;
     }
     const newArr = [...board];
@@ -171,6 +188,8 @@ const Home = () => {
     }
 
     if (num === boardRow * boardCol - bom) {
+      clearInterval(timerRef.current);
+      timerRef.current = undefined;
       setLose(13);
       return;
     }
@@ -196,6 +215,7 @@ const Home = () => {
     setRestBom(bom);
     setFirst(true);
     setLose(12);
+    setTime(0);
   };
 
   const handleLevel = (e: 'soft' | 'standerd' | 'hard' | 'costom') => {
@@ -233,6 +253,40 @@ const Home = () => {
           >
             カスタム
           </div>
+          {level === 'costom' ? (
+            <form>
+              <label htmlFor="row">row</label>
+              <input
+                type="number"
+                name="row"
+                id="row"
+                onChange={(e) => {
+                  setBoardRow(Number(e.target.value));
+                }}
+              />
+              <label htmlFor="col">col</label>
+              <input
+                type="number"
+                name="col"
+                id="col"
+                onChange={(e) => {
+                  setBoardCol(Number(e.target.value));
+                }}
+              />
+              <label htmlFor="bom">bom</label>
+              <input
+                type="number"
+                name="bom"
+                id="bom"
+                onChange={(e) => {
+                  setBom(Number(e.target.value));
+                }}
+              />
+              <input type="submit" value="更新" />
+            </form>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
       <div className={styles.gamecontainer}>
@@ -243,7 +297,7 @@ const Home = () => {
             style={{ backgroundPositionX: 30 - 30 * lose }}
             onClick={() => handleReset()}
           />
-          <div className={styles.display}>11</div>
+          <div className={styles.display}>{time}</div>
         </div>
         <div className={styles.board}>
           {board.map((row, y) => (
@@ -254,20 +308,20 @@ const Home = () => {
                     <div
                       key={`${x}-${y}`}
                       className={styles.cell}
-                      style={{ backgroundPositionX: 24 - 24 * 11 }}
+                      style={{ backgroundPositionX: 20 - 20 * 11 }}
                     />
                   ) : (
                     <div
                       key={`${x}-${y}`}
                       className={styles.cell}
-                      style={{ backgroundPositionX: 24 - 24 * col.neighbors }}
+                      style={{ backgroundPositionX: 20 - 20 * col.neighbors }}
                     />
                   )
                 ) : col.flagged ? (
                   <button
                     className={styles.cover}
                     style={{
-                      backgroundPositionX: 24 - 24 * 10,
+                      backgroundPositionX: 20 - 20 * 10,
                     }}
                     key={`${x}-${y}`}
                     onClick={() => handleTurnOver(x, y)}

@@ -163,10 +163,10 @@
 }
 
 .cell {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background: url('../../assets/images/bab7710d261a555d87e8df79.png') no-repeat;
-  background-size: auto 24px;
+  background-size: auto 20px;
   border: 1px solid #808080;
 }
 
@@ -177,11 +177,11 @@
 }
 
 .cover {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background: url('../../assets/images/bab7710d261a555d87e8df79.png') no-repeat;
   background-color: #c0c0c0;
-  background-size: auto 24px;
+  background-size: auto 20px;
   border: 1px solid #808080;
   box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #808080;
 }
